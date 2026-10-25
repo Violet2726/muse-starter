@@ -55,7 +55,7 @@ body {
   transition: background 0.25s ease, color 0.25s ease;
 }
 
-.wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 64px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 40px 28px 64px; }
 
 .head-rule { height: 4px; background: var(--accent); border-radius: 2px; margin-bottom: 24px; }
 
