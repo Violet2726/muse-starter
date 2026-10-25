@@ -61,6 +61,55 @@
           --v-aaai: #9db383;
         }
       }
+      /* manual theme override (toggle button); wins over the system scheme */
+      :root[data-theme="light"] {
+        color-scheme: light;
+        --bg: #f6f3ec;
+        --surface: #fffdf8;
+        --surface-2: #efe9dc;
+        --ink: #221d16;
+        --ink-2: #57503f;
+        --muted: #8a8172;
+        --line: #ddd5c3;
+        --line-soft: #e9e3d3;
+        --accent: #9c2b1e;
+        --accent-ink: #ffffff;
+        --accent-soft: #f6e3dc;
+        --gold: #8a6414;
+        --gold-soft: #f3e8c8;
+        --chip-bg: #ece6d6;
+        --chip-ink: #4c463a;
+        --shadow: 0 1px 2px rgba(60, 48, 20, 0.06), 0 8px 24px rgba(60, 48, 20, 0.05);
+        --v-neurips: #9c2b1e;
+        --v-icml: #0e6a58;
+        --v-iclr: #33527e;
+        --v-acl: #9a6a12;
+        --v-aaai: #5d6b4a;
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #15120e;
+        --surface: #1e1a14;
+        --surface-2: #26211a;
+        --ink: #ede6d6;
+        --ink-2: #c6bda9;
+        --muted: #978b76;
+        --line: #38312a;
+        --line-soft: #2c261e;
+        --accent: #e2704f;
+        --accent-ink: #1c110b;
+        --accent-soft: #3d241a;
+        --gold: #d3a94f;
+        --gold-soft: #38300f;
+        --chip-bg: #2a251d;
+        --chip-ink: #cfc6b2;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+        --v-neurips: #e2704f;
+        --v-icml: #3fae97;
+        --v-iclr: #7ea3d8;
+        --v-acl: #d3a94f;
+        --v-aaai: #9db383;
+      }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
       body {
@@ -179,6 +228,12 @@
         background: var(--surface); border: 1px solid var(--line);
         border-radius: 6px; padding: 8px 8px;
       }
+      .theme-btn {
+        font: inherit; font-size: 13.5px; color: var(--ink);
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: 6px; padding: 8px 12px; cursor: pointer; white-space: nowrap;
+      }
+      .theme-btn:hover { border-color: var(--ink-2); }
       .fgroup { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
       .fgroup .flab {
         font-size: 12px; color: var(--muted); letter-spacing: 0.08em;
@@ -324,6 +379,15 @@
         .toolbar { position: static; backdrop-filter: none; }
       }
     </style>
+    <script>
+      /* apply the saved manual theme before first paint */
+      try {
+        var savedTheme = localStorage.getItem("llm-debate-theme-v1");
+        if (savedTheme === "light" || savedTheme === "dark") {
+          document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+      } catch (e) { /* storage unavailable: fall back to system scheme */ }
+    </script>
   </head>
   <body>
     <div class="wrap">
@@ -369,6 +433,7 @@
             <option value="venue">按会议名称</option>
             <option value="orig">按清单原始顺序</option>
           </select>
+          <button class="theme-btn" id="themeBtn" type="button" aria-label="切换亮色 / 暗色主题">切换亮色</button>
         </div>
         <div class="tool-row">
           <div class="fgroup" id="f-venue"><span class="flab">会议</span></div>
@@ -804,6 +869,25 @@
         };
         reader.readAsText(f);
       });
+
+      /* ---------- light / dark theme toggle ---------- */
+      var THEME_KEY = "llm-debate-theme-v1";
+      var themeBtn = document.getElementById("themeBtn");
+      function effectiveTheme() {
+        var t = document.documentElement.getAttribute("data-theme");
+        if (t === "light" || t === "dark") return t;
+        return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function syncThemeBtn() {
+        themeBtn.textContent = effectiveTheme() === "dark" ? "切换亮色" : "切换暗色";
+      }
+      themeBtn.addEventListener("click", function () {
+        var next = effectiveTheme() === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* session-only switch still works */ }
+        syncThemeBtn();
+      });
+      syncThemeBtn();
 
       render();
     </script>
