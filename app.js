@@ -16,6 +16,7 @@
   var PAPERS = [];
   var readSet = loadRead();
   var state = { q: "", venue: "all", year: "all", theme: "all", dec: "all", read: "all", sort: "ydesc" };
+  var expanded = {}; // 本会话内展开的卡片（按 no 记录），默认全部收起
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -153,7 +154,7 @@
   }
 
   function paperRow(p) {
-    var row = el("article", "paper" + (readSet[p.no] ? " is-read" : ""));
+    var row = el("article", "paper" + (readSet[p.no] ? " is-read" : "") + (expanded[p.no] ? " expanded" : ""));
     var chkWrap = el("label", "readcheck");
     chkWrap.title = "标记为已读";
     var input = document.createElement("input");
@@ -170,6 +171,7 @@
     row.appendChild(chkWrap);
 
     var body = el("div", "paper-body");
+    var head = el("div", "paper-head");
     var h = el("h2", "ptitle");
     var a = document.createElement("a");
     a.href = p.url;
@@ -177,7 +179,21 @@
     a.rel = "noopener";
     a.textContent = p.title;
     h.appendChild(a);
-    body.appendChild(h);
+    head.appendChild(h);
+    var toggle = el("button", "toggle-btn", expanded[p.no] ? "收起" : "展开");
+    toggle.type = "button";
+    toggle.setAttribute("aria-expanded", expanded[p.no] ? "true" : "false");
+    toggle.setAttribute("aria-label", (expanded[p.no] ? "收起" : "展开") + "：" + p.title);
+    toggle.addEventListener("click", function () {
+      var open = !row.classList.contains("expanded");
+      row.classList.toggle("expanded", open);
+      toggle.textContent = open ? "收起" : "展开";
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) expanded[p.no] = true;
+      else delete expanded[p.no];
+    });
+    head.appendChild(toggle);
+    body.appendChild(head);
 
     var meta = el("div", "meta");
     var vb = el("span", "vbadge");
@@ -193,17 +209,19 @@
     if (readSet[p.no]) meta.appendChild(el("span", "readtag", "已读"));
     body.appendChild(meta);
 
-    if (p.authors && p.authors.length) {
-      body.appendChild(el("p", "authors", p.authors.join(" · ")));
-    }
-    if (p.intro) body.appendChild(el("p", "intro", p.intro));
     if (p.highlight) {
       var hl = el("p", "highlight");
       hl.appendChild(el("b", null, "亮点："));
       hl.appendChild(document.createTextNode(p.highlight));
       body.appendChild(hl);
     }
-    body.appendChild(el("p", "basis", "介绍依据：" + (p.basis === "fulltext" ? "论文全文" : "论文摘要")));
+    var details = el("div", "details");
+    if (p.authors && p.authors.length) {
+      details.appendChild(el("p", "authors", p.authors.join(" · ")));
+    }
+    if (p.intro) details.appendChild(el("p", "intro", p.intro));
+    details.appendChild(el("p", "basis", "介绍依据：" + (p.basis === "fulltext" ? "论文全文" : "论文摘要")));
+    body.appendChild(details);
     row.appendChild(body);
     return row;
   }
@@ -235,6 +253,14 @@
     state = { q: "", venue: "all", year: "all", theme: "all", dec: "all", read: "all", sort: state.sort };
     document.getElementById("q").value = "";
     syncAllChips();
+    render();
+  });
+  document.getElementById("btnExpandAll").addEventListener("click", function () {
+    filtered().forEach(function (p) { expanded[p.no] = true; });
+    render();
+  });
+  document.getElementById("btnCollapseAll").addEventListener("click", function () {
+    filtered().forEach(function (p) { delete expanded[p.no]; });
     render();
   });
 

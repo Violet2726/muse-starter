@@ -99,7 +99,7 @@ body {
 }
 #q:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-#sortsel, .theme-btn, .io-btn, #clear {
+#sortsel, .theme-btn, .io-btn, #clear, .count-actions button {
   padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--card); color: var(--text); font: inherit; cursor: pointer;
 }
@@ -136,6 +136,18 @@ body {
 .paper:hover { background: var(--card-hover); }
 .paper.is-read { opacity: 0.78; }
 .paper.is-read .ptitle { text-decoration: none; }
+
+.paper-head { display: flex; gap: 10px; align-items: flex-start; }
+.paper-head .ptitle { flex: 1; }
+.toggle-btn {
+  flex-shrink: 0; margin-top: 3px; padding: 3px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--chip-bg); color: var(--text);
+  font: inherit; font-size: 0.86rem; cursor: pointer; white-space: nowrap;
+}
+.toggle-btn:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.details { display: none; }
+.paper.expanded .details { display: block; }
+.count-actions { display: flex; gap: 8px; }
 
 .readcheck { flex-shrink: 0; padding-top: 4px; }
 .readcheck input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
